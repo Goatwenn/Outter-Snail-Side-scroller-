@@ -16,8 +16,8 @@
 
     var config = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: 4000,
+        height: 1080,
         physics: {
             default: 'arcade',
             arcade: {
@@ -40,21 +40,22 @@
     var platforms;
     var cursors;
     
+    var positionCam;
+    
     var jump;
-    
-    var doubleSautFait = false;
-    var doubleSaut = false;
-    var verifSaut = true;
-    
+    var toucheLeSol = false;
+    var puissanceDeSaut = 0;
     
     var game = new Phaser.Game(config);
     
     
 // Valeur D'equilibrages -----------------------------------------------
     
-    var HauterDeSaut = 380;
-    var Deplacement = 180;
-
+    var hauterDeSaut = 380;  // Hauteur min du saut
+    var tempsDeSaut = 60;    // Temps de mintien de touche en tic
+    
+    var deplacement = 180;   // Vitesse de deplacement
+    
     
 
     
@@ -65,10 +66,12 @@
     
     
     function preload ()
-    {
+    {   
         this.load.image('sky', 'assets/sky.png');
-        this.load.image('ground', 'assets/platform.png');
-        this.load.spritesheet('dude', 'assets/escargot.png', { frameWidth: 54, frameHeight: 27 });
+        this.load.image('sol', 'assets/sol.png');
+        this.load.image('killZone', 'assets/centre.png');
+        this.load.image('platforme', 'assets/platforme_1.png');
+        this.load.spritesheet('snail', 'assets/snail.png', { frameWidth: 108, frameHeight: 54 });
     }
 
     
@@ -78,60 +81,122 @@
    
     function create ()
     {
-        this.add.image(400, 300, 'sky');
+    // - Sky :
+        this.add.image(960, 540, 'sky');
 
+        
+     // - Phisique :   
         platforms = this.physics.add.staticGroup();
         centre = this.physics.add.staticGroup();
 
-        platforms.create(400, 568, 'ground').setScale(2).refreshBody();
-        platforms.create(400, 32, 'ground').setScale(2).refreshBody();
+    // - Sol : 
+        platforms.create(960, 0, 'sol').refreshBody();
+        platforms.create(960, 1080, 'sol').refreshBody();;
+        
+     // - Platforms :    
+        platforms.create(2250, 250, 'platforme')
+        platforms.create(2700, 250, 'platforme')
+        platforms.create(2000, 700, 'platforme')
+       
         
         
         
-        // joueur
-        player = this.physics.add.sprite(100, 450, 'dude');
+    // joueur
+        player = this.physics.add.sprite(960, 740, 'snail');
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
-
-    
         
         
-        // Cursors
+        
+        
+        
+        
+        
+        
+        
+        
+    // Cameras
+        this.cameras.main.setSize(1920, 1080);
+        
+        
+    // Cursors
         cursors = this.input.keyboard.createCursorKeys();
 
         
-        // Score
-        jumpText = this.add.text(30, 15, ('jump = '+ verifSaut), { fontSize: '20px', fill: '#000' });
-        doublejumpText = this.add.text(30, 32, ('doublejump = '+ doubleSaut), { fontSize: '20px', fill: '#000' });
+    // Score
+        puissanceText = this.add.text(1920, 16, (puissanceDeSaut), { fontSize: '32px', fill: '#000' });
+        toucheSolText = this.add.text(1950, 16,('test' +toucheLeSol), { fontSize: '32px', fill: '#000' });
         
+        playeryText = this.add.text(1920, 1015, ('y ='+ player.y), { fontSize: '32px', fill: '#000' }); 
+        playerxText = this.add.text(1920, 1035, ('X ='+ player.x), { fontSize: '32px', fill: '#000' }); 
         
-        
-        // Collider et Overlap
+    // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
-       
-        this.physics.add.overlap(player, centre,);
+        
+        
+    // Animation -------------------------------------------------
+        
+        this.anims.create({
+            key: 'flip',
+            frames: [ { key: 'snail', frame: 2. } ],
+            frameRate: 20
+        });
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     }
 
     
     
-//__ Fonction Update ________________________________________________________________________________________________________________________________________________ 
-//___________________________________________________________________________________________________________________________________________________________________
-    
+//__ Fonction Update ____________________________________________________________________________________________________
+//_______________________________________________________________________________________________________________________
     function update ()
     {  
-// Gravité
-        //_____________________________________________________________________________
+// Cam 
+    //_____________________________________________________________________________
+        positionCam = player.x - 960;
+        this.cameras.main.scrollX = positionCam;
+
         
+// Debug Info :
+    //_____________________________________________________________________________
+        playeryText.setText('y ='+ player.y);
+        playerxText.setText('x ='+ player.x);
+        
+        
+        
+// Gravité
+        //__________________________________________________________________________  
     // Sol -----------------------------
-        if (player.y >= 300){
+        if (player.y > 540){
             player.setGravityY(300);
-            jump = - HauterDeSaut
+            jump = - hauterDeSaut
+            player.anims.play('flip');
+            
+            if (player.y <= 570){
+                toucheLeSol = false
+            toucheSolText.setText('test' +toucheLeSol);
+            }
+            
         }
         
     // plafond -------------------------
-        if (player.y < 300){
+        if (player.y < 540){
             player.setGravityY(-900);
-            jump = HauterDeSaut
+            jump = hauterDeSaut
+            
+            if (player.y >= 510){
+                toucheLeSol = false
+            toucheSolText.setText('test' +toucheLeSol);
+            }
         }
      
         
@@ -141,12 +206,12 @@
         
     // Gauche -------------------------
         if (cursors.left.isDown)  {
-            player.setVelocityX(-Deplacement);
+            player.setVelocityX(-deplacement);
         }
         
     //Droite --------------------------
         else if (cursors.right.isDown){
-            player.setVelocityX(Deplacement);
+            player.setVelocityX(deplacement);
         }
         
     //Kill du momentum ----------------
@@ -157,27 +222,30 @@
         
     //Saut  -----------------------------------------------
         
-        //Etape-1 : apuis touche --> saut + plus toucher sol
-        if (cursors.up.isDown && verifSaut == true && doubleSaut == false){
-            verifSaut = false
+        if (cursors.up.isDown && toucheLeSol == true){
             player.setVelocityY(jump);
-            jumpText.setText('jump = '+ verifSaut);
-            }  
-        
-        //Etape-2 : lacher touche --> doublesaut activer
-        if (cursors.up.isUp && verifSaut == false && doubleSaut == false){
-            doubleSaut = true
-            doublejumpText.setText('doublejump = '+ doubleSaut);
         }
-       
-        //Etape-3 : apuis touche 2 --> saut + doublesaut desactiver
-        if (cursors.up.isDown && doubleSaut == true && verifSaut == false )
-            player.setVelocityY(jump);
-            
-        }  
-    
+         
+        if (cursors.up.isDown){
+            puissanceDeSaut = puissanceDeSaut + 1
+            puissanceText.setText(puissanceDeSaut);
+        }
 
-       
+        if (cursors.up.isUp){
+            toucheLeSol = false
+            toucheSolText.setText('test' +toucheLeSol);
+        }
+        
+        
+        if (puissanceDeSaut == tempsDeSaut){
+            toucheLeSol = false
+            toucheSolText.setText('test' +toucheLeSol);
+        }
+        
+        
+        
+        
+    }
     
 //__ Fonction Anex __________________________________________________________________________________________________________________________________________________ 
 //___________________________________________________________________________________________________________________________________________________________________
@@ -185,12 +253,9 @@
     
     function toucheSol (player, platforms)
     {
-        verifSaut = true;
-        doubleSaut = false;
-        jumpText.setText('jump = '+ verifSaut);
-        doublejumpText.setText('doublejump = '+ doubleSaut);
-
-        
+        toucheLeSol = true
+        toucheSolText.setText('test' +toucheLeSol);
+        puissanceDeSaut = 0
     }
        
 </script>
