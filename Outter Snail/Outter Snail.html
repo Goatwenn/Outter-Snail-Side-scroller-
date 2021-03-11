@@ -39,7 +39,7 @@
     var platforms;
     var cursors;
     var gravite = true;      // Grave true = normale / false = a l'envert
-    var animation = true;    // true = gauche / false = droit
+    var animation = false;    // true = gauche / false = droit
     
     var positionCam;
     
@@ -136,27 +136,23 @@
             
     // Rotation -------------------------------
         this.anims.create({
-            key: 'flip',
+            key: 'flipDroit',
             frames: [ { key: 'snail', frame: 0. } ],
         });
         
         this.anims.create({
-            key: 'reflip',
+            key: 'reflipDroit',
             frames: [ { key: 'snail', frame: 8. } ],
         });
         
-        
-        
-     // Pause ------------------------------------
-        
         this.anims.create({
-            key: 'tenirGauche',
+            key: 'flipGauche',
             frames: [ { key: 'snail', frame: 4. } ],
         });
         
         this.anims.create({
-            key: 'tenirGaucheFlip',
-            frames: [ { key: 'snail', frame: 13. } ],
+            key: 'reflipGauche',
+            frames: [ { key: 'snail', frame: 12. } ],
         });
         
       
@@ -244,16 +240,22 @@
             }    
         }
         
-        if(player.y >= 530 && gravite == false ){
-            player.anims.play('reflip');
-        }
-        else if(player.y >= 530 && gravite == false )
-        
-        
-        if(player.y <= 550 && gravite == true ){
-            player.anims.play('flip');
+        if(player.y >= 530 && gravite == false && animation == false){
+            player.anims.play('reflipDroit');
         }
         
+        if(player.y >= 530 && gravite == false && animation == true){
+            player.anims.play('reflipGauche');
+        }
+        
+        
+        if(player.y <= 550 && gravite == true && animation == false){
+            player.anims.play('flipDroit');
+        }
+        
+        if(player.y <= 550 && gravite == true && animation == true){
+            player.anims.play('flipGauche');
+        }
         
         
 // Deplacement
