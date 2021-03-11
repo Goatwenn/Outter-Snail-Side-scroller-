@@ -47,20 +47,19 @@
     var toucheLeSol = false;
     var puissanceDeSaut = 0;
     
+    var cooldawn = 120;
+    
     var game = new Phaser.Game(config);
     
     
 // Valeur D'equilibrages -----------------------------------------------
     
     var hauterDeSaut = 380;  // Hauteur min du saut
-    var tempsDeSaut = 60;    // Temps de mintien de touche en tic
+    var tempsDeSaut = 50;    // Temps de mintien de touche en tic
     
     var deplacement = 180;   // Vitesse de deplacement
     
-    
 
-    
-    
 //__ Fonction Preload ____________________________________________________________________________________
 //________________________________________________________________________________________________________
     
@@ -72,7 +71,7 @@
         this.load.image('sol', 'assets/sol.png');
         this.load.image('killZone', 'assets/centre.png');
         this.load.image('platforme', 'assets/platforme_1.png');
-        this.load.spritesheet('snail', 'assets/testSnail.png', { frameWidth: 108, frameHeight: 54 });
+        this.load.spritesheet('snail', 'assets/snail.png', { frameWidth: 108, frameHeight: 54 });
     }
 
     
@@ -117,15 +116,18 @@
         cursors = this.input.keyboard.createCursorKeys();
 
         
-    // Affichagess
-        puissanceText = this.add.text(1920, 66, ('PSaut = '+puissanceDeSaut), { fontSize: '32px', fill: '#000' });
-        sautText = this.add.text(1920, 96,('Saut' +toucheLeSol), { fontSize: '32px', fill: '#000' });
+    // Affichages Dubug
+        puissanceText = this.add.text(1920, 66, (''), { fontSize: '32px', fill: '#000' });
+        sautText = this.add.text(1920, 96,(''), { fontSize: '32px', fill: '#000' });
         
-        playeryText = this.add.text(1920, 6, ('y ='+ player.y), { fontSize: '32px', fill: '#000' }); 
-        playerxText = this.add.text(1920, 36, ('X ='+ player.x), { fontSize: '32px', fill: '#000' }); 
+        playeryText = this.add.text(1920, 6, (''), { fontSize: '32px', fill: '#000' }); 
+        playerxText = this.add.text(1920, 36, (''), { fontSize: '32px', fill: '#000' }); 
         
-        gravText = this.add.text(1920, 126,('grav ='+ gravite), { fontSize: '32px', fill: '#000' });
-        animationText = this.add.text(1920, 156,('coter ='+ animation), { fontSize: '32px', fill: '#000' });
+        gravText = this.add.text(1920, 126,(''), { fontSize: '32px', fill: '#000' });
+        animationText = this.add.text(1920, 156,(''), { fontSize: '32px', fill: '#000' });
+        positionCamText = this.add.text(1920, 186,(''), { fontSize: '32px', fill: '#000' });
+        
+        cooldawnDebugText = this.add.text(1920, 216,(''), { fontSize: '32px', fill: '#000' });
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
@@ -142,7 +144,7 @@
         
         this.anims.create({
             key: 'reflipDroit',
-            frames: [ { key: 'snail', frame: 8. } ],
+            frames: [ { key: 'snail', frame: 9. } ],
         });
         
         this.anims.create({
@@ -152,7 +154,7 @@
         
         this.anims.create({
             key: 'reflipGauche',
-            frames: [ { key: 'snail', frame: 12. } ],
+            frames: [ { key: 'snail', frame: 13. } ],
         });
         
       
@@ -160,39 +162,27 @@
     // Les Turn ------------------------------
         this.anims.create({
             key: 'turnLeft',
-            frameRate : 20,
-            frames: [ { key: 'snail', frame: 1. } ],
-            frames: [ { key: 'snail', frame: 2. } ],
-            frames: [ { key: 'snail', frame: 3. } ],
-            frames: [ { key: 'snail', frame: 4. } ],
+            frames: this.anims.generateFrameNumbers('snail', { start: 1, end: 4 }),
+            duration: 300,
         });
         
         this.anims.create({
             key: 'turnRight',
-            frameRate : 20,
-            frames: [ { key: 'snail', frame: 5. } ],
-            frames: [ { key: 'snail', frame: 6. } ],
-            frames: [ { key: 'snail', frame: 7. } ],
-            frames: [ { key: 'snail', frame: 0. } ],
+            frames: this.anims.generateFrameNumbers('snail', { start: 5, end: 8 }),
+            duration: 300,
         });
-        
+    
         this.anims.create({
             key: 'turnLeftFlip',
-            frameRate : 20,
-            frames: [ { key: 'snail', frame: 9. } ],
-            frames: [ { key: 'snail', frame: 10. } ],
-            frames: [ { key: 'snail', frame: 11. } ],
-            frames: [ { key: 'snail', frame: 12. } ],
+            frames: this.anims.generateFrameNumbers('snail', { start: 10, end: 13 }),
+            duration: 300,
         });
-        
+    
         this.anims.create({
             key: 'turnRightFlip',
-            frameRate : 20,
-            frames: [ { key: 'snail', frame: 13. } ],
-            frames: [ { key: 'snail', frame: 14. } ],
-            frames: [ { key: 'snail', frame: 15. } ],
-            frames: [ { key: 'snail', frame: 8. } ],
-        });      
+            frames: this.anims.generateFrameNumbers('snail', { start: 14, end: 17 }),
+            duration: 300,
+        });             
     }
   
 //__ Fonction Update _____________________________________________________________________________________
@@ -201,16 +191,22 @@
     {  
 // Cam 
     //_____________________________________________________________________________
-        positionCam = player.x - 960;
-        this.cameras.main.scrollX = positionCam;
+        positionCam = (player.y - 540)/1.5;
+        this.cameras.main.startFollow(player,false,0.5,0.5,0,positionCam);
+        
 
         
 // Debug Info :
     //_____________________________________________________________________________
         playeryText.setText('y ='+ player.y);
         playerxText.setText('x ='+ player.x);
-        
-        
+        sautText.setText('Saut' +toucheLeSol);
+        gravText.setText('grav ='+ gravite);
+        animationText.setText(('coter ='+ animation));
+        puissanceText.setText('PSaut = '+puissanceDeSaut);
+        positionCamText.setText('CamLocation = '+positionCam);
+        cooldawnDebugText.setText('cooldawn = '+cooldawn);
+
         
 // Gravité
         //__________________________________________________________________________  
@@ -218,12 +214,10 @@
         if (player.y > 540){
             player.setGravityY(300);
             gravite = true
-            gravText.setText('grav ='+ gravite);
             
             jump = - hauterDeSaut
             if (player.y <= 570){
                 toucheLeSol = false
-                sautText.setText('Saut' +toucheLeSol);
             }
         }
         
@@ -231,12 +225,10 @@
         if (player.y < 540){
             player.setGravityY(-900);
             gravite = false
-            gravText.setText('grav ='+ gravite);
             
             jump = hauterDeSaut
             if (player.y >= 510){
                 toucheLeSol = false
-                sautText.setText('Saut' +toucheLeSol);
             }    
         }
         
@@ -264,30 +256,28 @@
     // Gauche -------------------------
         if (cursors.left.isDown)  {
             player.setVelocityX(-deplacement);
-            animation = true
-            animationText.setText(('coter ='+ animation));
             
-            if(gravite == true){
+            if(gravite == true && animation == false){
                 player.anims.play('turnLeft');
             }
-            if(gravite == false){
+            if(gravite == false && animation == false){
                 player.anims.play('turnLeftFlip');
             }
+            animation = true
 
         }
         
     //Droite --------------------------
         else if (cursors.right.isDown){
             player.setVelocityX(deplacement);
-            animation = false
-            animationText.setText(('coter ='+ animation));
             
-            if(gravite == true){
+            if(gravite == true && animation == true){
                 player.anims.play('turnRight');
             }
-            if(gravite == false){
+            if(gravite == false && animation == true){
                 player.anims.play('turnRightFlip');
             }
+            animation = false
         }
         
     //Kill du momentum ----------------
@@ -304,15 +294,40 @@
          
         if (cursors.up.isDown){
             puissanceDeSaut = puissanceDeSaut + 1
-            puissanceText.setText('PSaut = '+puissanceDeSaut);
         }
 
         if (cursors.up.isUp || puissanceDeSaut == tempsDeSaut){
             toucheLeSol = false
-            sautText.setText('Saut' +toucheLeSol);
-        }   
-    }
+        }  
+        
+          
+    // Pouvoir -------------------------
     
+        cooldawn = cooldawn - 1
+
+        
+        if (cursors.space.isDown && cooldawn <0 ){
+            if(animation = false){
+                player.setVelocityX(1000);
+            }
+            else{
+                player.setVelocityX(-1000);
+            }
+                cooldawn = 240
+            
+        }
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+    }
+
 //__ Fonction Anex _______________________________________________________________________________________ 
 //________________________________________________________________________________________________________
 
@@ -320,7 +335,6 @@
     function toucheSol (player, platforms)
     {
         toucheLeSol = true
-        sautText.setText('test' +toucheLeSol);
         puissanceDeSaut = 0
     }
        
