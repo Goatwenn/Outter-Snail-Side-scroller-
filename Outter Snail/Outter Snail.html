@@ -46,7 +46,8 @@
     
     var jump;
     var toucheLeSol = false;
-    var puissanceDeSaut = 0;
+    var doubleJump = false;
+    var finDoubleJump = false;
     
     var cooldawn = 120;
     
@@ -55,10 +56,9 @@
     
 // Valeur D'equilibrages -----------------------------------------------
     
-    var hauterDeSaut = 380;  // Hauteur min du saut
-    var tempsDeSaut = 50;    // Temps de mintien de touche en tic
+    var hauterDeSaut = 500;  // Hauteur min du saut
     
-    var deplacement = 180;   // Vitesse de deplacement
+    var deplacement = 280;   // Vitesse de deplacement
     
 
 //__ Fonction Preload ____________________________________________________________________________________
@@ -108,8 +108,8 @@
         
         
     // Fruit :  
-        fruit = this.physics.add.group(); 
-        var fruit = fruit.create(300,600,'fruit');
+        //fruit = this.physics.add.group(); 
+        //var fruit = fruit.create(300,600,'fruit');
         //fruit.fixedToCamera = true;
         
         
@@ -129,8 +129,8 @@
 
         
     // Affichages Dubug
-        puissanceText = this.add.text(1920, 66, (''), { fontSize: '32px', fill: '#000' });
-        sautText = this.add.text(1920, 96,(''), { fontSize: '32px', fill: '#000' });
+        sautText = this.add.text(294,1356,(''), { fontSize: '32px', fill: '#000' });
+        doubleJumpText = this.add.text(294,1306,(''), { fontSize: '32px', fill: '#000' });
         
         playeryText = this.add.text(1920, 6, (''), { fontSize: '32px', fill: '#000' }); 
         playerxText = this.add.text(1920, 36, (''), { fontSize: '32px', fill: '#000' }); 
@@ -203,7 +203,7 @@
     {  
 // Cam 
     //_____________________________________________________________________________
-        positionCam = (player.y - 1080)/1.5;
+        positionCam = (player.y - 1080)/2;
         this.cameras.main.startFollow(player,false,0.50,0.50,0,positionCam);
         
 
@@ -214,13 +214,12 @@
     //_____________________________________________________________________________
         playeryText.setText('y ='+ player.y);
         playerxText.setText('x ='+ player.x);
-        sautText.setText('Saut' +toucheLeSol);
-        gravText.setText('grav ='+ gravite);
-        animationText.setText(('coter ='+ animation));
-        puissanceText.setText('PSaut = '+puissanceDeSaut);
+        sautText.setText('Au Sol = ' +toucheLeSol);
+        gravText.setText('grav = '+ gravite);
+        animationText.setText(('Droite = '+ animation));
         positionCamText.setText('CamLocation = '+positionCam);
         cooldawnDebugText.setText('cooldawn = '+cooldawn);
-
+        doubleJumpText.setText('Double Saut = ' +doubleJump);
         
 // Gravité
         //__________________________________________________________________________  
@@ -301,20 +300,22 @@
     
         
     //Saut  -----------------------------------------------
-        
+    
         if (cursors.up.isDown && toucheLeSol == true){
             player.setVelocityY(jump);
-        }
-         
-        if (cursors.up.isDown){
-            puissanceDeSaut = puissanceDeSaut + 1
-        }
-
-        if (cursors.up.isUp || puissanceDeSaut == tempsDeSaut){
             toucheLeSol = false
-        }  
+        }
         
-          
+        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false){
+            doubleJump = true
+        }
+        
+        if (cursors.up.isDown && doubleJump == true){
+            player.setVelocityY(jump);
+            finDoubleJump = true
+            doubleJump = false
+        }
+        
     // Pouvoir -------------------------
     
         cooldawn = cooldawn - 1
@@ -341,7 +342,8 @@
     function toucheSol (player, platforms)
     {
         toucheLeSol = true
-        puissanceDeSaut = 0
+        doubleJump = false
+        finDoubleJump = false
     }
        
 </script>
