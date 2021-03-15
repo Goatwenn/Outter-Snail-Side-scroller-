@@ -49,7 +49,7 @@
     var gravite = true;      // Grave true = normale / false = a l'envert
     var animation = false;    // true = gauche / false = droit
     
-    var positionCam;
+    var camOffsetY;
     
     var jump;
     var toucheLeSol = false;
@@ -58,8 +58,10 @@
     
     var cooldawn = 120;
     
-    var vieDuJoueur = 1;
+    var vieDuJoueur = 199.75;
     var barreDeVie;
+    var joueurMort = false;
+    
     
 // Variable Timer -----------------------------------------------
     
@@ -104,6 +106,7 @@
         
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
+        this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
     }
 
     
@@ -115,13 +118,8 @@
     {
     // - Sky :
         this.add.image(4000, 1080, 'sky');
-
-
-    
         
-        
-        
-     // - Phisique :   
+    // - Phisique :   
         platforms = this.physics.add.staticGroup();
 
     // - Platforms : 
@@ -135,12 +133,15 @@
         platforms.create(6848,1941, 'platforme_M1_8');
     
         
-        barreDeVie = this.physics.add.sprite(6564,1660, 'vie');
+        barreDeVie = this.physics.add.sprite(200,800, 'vie').setScrollFactor(0,0);
+    
+        
         
     //Space Ship (sortie de niveaux)  
         
-        spaceShip = this.physics.add.sprite(7464,1460, 'spaceShip');
+        spaceShip = this.physics.add.sprite(7464,1660, 'spaceShip');
         
+        ennemi = this.physics.add.sprite(6064,1460, 'ennemi');
         
     // Fruit :  
         //fruit = this.physics.add.group(); 
@@ -149,7 +150,7 @@
         
         
     // joueur
-        player = this.physics.add.sprite(6564,1660, 'snail');
+        player = this.physics.add.sprite(6564,1460, 'snail');
         player.setBounce(0.2);
         player.setCollideWorldBounds(true);
         
@@ -157,27 +158,27 @@
         
     // Cameras
         this.cameras.main.setSize(1920, 1080);
-        this.cameras.main.setBounds(0,0,8000,2160)
-        //this.cameras.setCollideWorldBounds(true);
+        this.cameras.main.setBounds(0,0,8000,2160);
+        
+        
         
     // Cursors
         cursors = this.input.keyboard.createCursorKeys();
 
         
     // Affichages Dubug
-        sautText = this.add.text(294,1356,(''), { fontSize: '32px', fill: '#000' });
-        doubleJumpText = this.add.text(294,1306,(''), { fontSize: '32px', fill: '#000' });
+        sautText = this.add.text(20,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        doubleJumpText = this.add.text(20,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        playeryText = this.add.text(1920, 6, (''), { fontSize: '32px', fill: '#000' }); 
-        playerxText = this.add.text(1920, 36, (''), { fontSize: '32px', fill: '#000' }); 
+        playeryText = this.add.text(20,110, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
+        playerxText = this.add.text(20,140, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
+        camOffsetYText = this.add.text(20,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        gravText = this.add.text(1920, 126,(''), { fontSize: '32px', fill: '#000' });
-        animationText = this.add.text(1920, 156,(''), { fontSize: '32px', fill: '#000' });
-        positionCamText = this.add.text(1920, 186,(''), { fontSize: '32px', fill: '#000' });
+        gravText = this.add.text(20,230,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        animationText = this.add.text(20,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        cooldawnDebugText = this.add.text(1920, 216,(''), { fontSize: '32px', fill: '#000' });
-        
-    
+        vieDuJoueurText = this.add.text(20,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        joueurMortTexT = this.add.text(20,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
@@ -185,6 +186,8 @@
         this.physics.add.collider(spaceShip, platforms);
         this.physics.add.overlap(player, spaceShip, sortieDeNiveau);
         
+        this.physics.add.collider(ennemi, platforms);
+        this.physics.add.collider(ennemi, player, degat);
         
 // Animation -------------------------------------------------
         
@@ -246,37 +249,41 @@
             frames: this.anims.generateFrameNumbers('spaceShip', { start: 1, end: 12 }),
             frameRate: 6,
         });
-    
         
         this.anims.create({
             key: 'reacteur',
-            frames: this.anims.generateFrameNumbers('spaceShip', { start: 10, end: 12 }),
-            frameRate: 6,
+            frames: this.anims.generateFrameNumbers('spaceShip', { start: 10, end: 11 }),
+            frameRate: 2,
             repeat: 10000,
         });
         
         
     // Barre de Vie ------------------------------
-
+       
         this.anims.create({
-            key: '3_coeur',
+            key: 'enVie',
             frames: [ { key: 'vie', frame: 0. } ],
         });
         
         this.anims.create({
-            key: '2_coeur',
+            key: 'blesser',
             frames: [ { key: 'vie', frame: 1. } ],
         });
         
         this.anims.create({
-            key: '1_coeur',
+            key: 'douloureux',
+            frames: [ { key: 'vie', frame: 2. } ],
+        });
+        
+        this.anims.create({
+            key: 'critique',
             frames: this.anims.generateFrameNumbers('vie', { start: 2, end: 3 }),
-            frameRate: 6,
+            frameRate: 4,
             repeat: 10000,
         });
         
         this.anims.create({
-            key: '0_coeur',
+            key: 'mort',
             frames: [ { key: 'vie', frame: 4. } ],
         });
         
@@ -290,36 +297,39 @@
 //________________________________________________________________________________________________________
     function update ()
     {  
-        
+        ennemi.setVelocityX(0);
         
         
 // Barre de Vie 
     //_____________________________________________________________________________      
         
         barreDeVie.setGravityY(-300);
-
-        barreDeVie.x = player.x - 700
-        barreDeVie.y = (player.y+1950)/2
-        
-        if(vieDuJoueur == 3){
-            barreDeVie.anims.play('3_coeur');
+        if (vieDuJoueur <= 199.75 && joueurMort == false){
+            vieDuJoueur = vieDuJoueur + 0.25
         }
         
-        else if (vieDuJoueur == 2){
-            barreDeVie.anims.play('2_coeur');
+        if(vieDuJoueur >= 150){
+            barreDeVie.anims.play('enVie');
         }
         
-        else if (vieDuJoueur == 1){
-            barreDeVie.anims.play('1_coeur');
+        else if (vieDuJoueur >= 100 && vieDuJoueur <= 150){
+            barreDeVie.anims.play('blesser');
         }
         
-        else if (vieDuJoueur == 0){
-            barreDeVie.anims.play('0_coeur');
+        else if (vieDuJoueur >= 50 && vieDuJoueur <= 100){
+            barreDeVie.anims.play('douloureux');
         }
+        
+           
+        if (vieDuJoueur <= 0){
+            joueurMort = true
+        }   
+            
+            
 // Cam 
     //_____________________________________________________________________________
-        positionCam = (player.y - 1080)/2;
-        this.cameras.main.startFollow(player,false,0.05,0.05,0,positionCam);   
+        camOffsetY = (player.y - 1080)/2;
+        this.cameras.main.startFollow(player,false,0.05,0.05,0,camOffsetY);   
         
 // Debug Info :
     //_____________________________________________________________________________
@@ -328,9 +338,10 @@
         sautText.setText('Au Sol = ' +toucheLeSol);
         gravText.setText('grav = '+ gravite);
         animationText.setText(('Droite = '+ animation));
-        positionCamText.setText('CamLocation = '+positionCam);
-        cooldawnDebugText.setText('cooldawn = '+cooldawn);
+        camOffsetYText.setText('camOffsetY = '+camOffsetY);
         doubleJumpText.setText('Double Saut = ' +doubleJump);
+        vieDuJoueurText.setText('Vie = ' +vieDuJoueur);
+        joueurMortTexT.setText('Joueur Mort = ' +joueurMort);
 // Gravité
         //__________________________________________________________________________  
     // Sol -----------------------------
@@ -431,14 +442,14 @@
         cooldawn = cooldawn - 1
 
         
-        if (cursors.space.isDown && cooldawn <0 ){
+        if (cursors.space.isDown ){
             if(animation = false){
                 player.setVelocityX(1000);
             }
             else{
                 player.setVelocityX(-1000);
             }
-                cooldawn = 240
+                
             
         }
         
@@ -465,9 +476,41 @@
         //spaceShip.anims.play('reacteur');
         spaceShip.setGravityY(-300);
         spaceShip.setVelocityY(-200);
-
     }
       
+    
+    function degat (player, ennemi)
+    {
+        
+        if (vieDuJoueur > 0){
+            vieDuJoueur = vieDuJoueur - 2
+        }
+        
+        
+        if(vieDuJoueur >= 150){
+            barreDeVie.anims.play('enVie');
+        }
+        
+        else if (vieDuJoueur >= 100 && vieDuJoueur <= 150){
+            barreDeVie.anims.play('blesser');
+        }
+        
+        else if (vieDuJoueur >= 50 && vieDuJoueur <= 100){
+            barreDeVie.anims.play('douloureux');
+        }
+        
+        else if (vieDuJoueur >= 0 && vieDuJoueur <= 50){
+            barreDeVie.anims.play('critique');
+        }
+        
+        else if (vieDuJoueur <= 0){
+            barreDeVie.anims.play('mort');
+        }
+         
+    }
+    
+    
+    
 </script>
 
 </body>
