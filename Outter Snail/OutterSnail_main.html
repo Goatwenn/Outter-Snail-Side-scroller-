@@ -38,38 +38,54 @@
    var game = new Phaser.Game(config); 
     
 // Variable ____________________________________________
-    
-    
+     
     var player;
     var platforms;
     var cursors;
     var fruit;
-    var spaceShip;
     
+    var ennemi;
+    var ennemiMort = false;
+    
+  // SpaceShip ------------------   
+    var spaceShip;
+    var timerSpaceShipOn = false;
+    var timeAnimeShip = 0;
+    var particuleSpaceshipOn = false;
+    
+  // Info ------------------   
     var gravite = true;      // Grave true = normale / false = a l'envert
     var droite = false;    // true = gauche / false = droit
     
+  // camera ------------------    
     var camOffsetY;
     
+  // Saut ------------------  
     var jump;
     var toucheLeSol = false;
     var doubleJump = false;
     var finDoubleJump = false;
     
-    var vieDuJoueur = 199.75;
+  // Barre De Vie ------------------  
+    var vieDuJoueur = 3;
     var barreDeVie;
     var joueurMort = false;
+    var invincible = false;
+    var timerInvincible = 0;
     
-// Pouvoir ------------------  
+    
+  // Pouvoir ------------------  
     var dash = true;
+    var timerDashOn = false;
+    var timerDash = 0;
+    var directionDash;
+    
     var jetPack = false;
     
-// Variable Timer -----------------------------------------------
-    
-    var timeAnimeShip;
-    
-    
-    
+  // Particule ------------------ 
+    var particule;
+    var timerParticules = 0;
+    var randomParticules = 0;
     
 // Valeur D'equilibrages -----------------------------------------------
     
@@ -77,6 +93,7 @@
     
     var deplacement = 280;   // Vitesse de deplacement
     
+    var TempsDinvinciblilite = 150; // Durée de L'invinciblilité 
 
 //__ Fonction Preload ____________________________________________________________________________________
 //________________________________________________________________________________________________________
@@ -93,21 +110,35 @@
         this.load.image('platforme_M1_6', 'assets/monde_1/platforme_M1_6.png');
         this.load.image('platforme_M1_7', 'assets/monde_1/platforme_M1_7.png');
         this.load.image('platforme_M1_8', 'assets/monde_1/platforme_M1_8.png');
-       
-       
+        
+        
+        this.load.image('limiteDeMap', 'assets/limiteDeMap.png');
         
     // Objetc
         this.load.image('sky', 'assets/sky_niveaux1.png');
         this.load.image('fruit', 'assets/fruit.png');
-        this.load.image('killZone', 'assets/centre.png');
-        this.load.image('particules', 'assets/particules.png');
         
-        this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126})
+        this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
         
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
         this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
+        
+        
+        
+    // Particules  
+        this.load.image('particule_energie_1', 'assets/particules/particule_energie_1.png');
+        this.load.image('particule_energie_2', 'assets/particules/particule_energie_2.png');
+        this.load.image('particule_Flamme_1', 'assets/particules/particule_Flamme_1.png');
+        this.load.image('particule_Flamme_2', 'assets/particules/particule_Flamme_2.png');
+        this.load.image('particule_herbe_1', 'assets/particules/particule_herbe_1.png');
+        this.load.image('particule_herbe_2', 'assets/particules/particule_herbe_2.png');
+        this.load.image('particule_sang_1', 'assets/particules/particule_sang_1.png');
+        this.load.image('particule_sang_2', 'assets/particules/particule_sang_2.png');
+        this.load.image('particule_terre_1', 'assets/particules/particule_terre_1.png');
+        this.load.image('particule_terre_2', 'assets/particules/particule_terre_2.png');
+        
     }
 
     
@@ -133,10 +164,12 @@
         platforms.create(4324,1665, 'platforme_M1_7');
         platforms.create(6848,1941, 'platforme_M1_8');
     
+    // - limite de maps :   
+        platforms.create(4000,-30, 'limiteDeMap');
+        platforms.create(4000,2190, 'limiteDeMap');
         
         barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);
     
-        
         
     //Space Ship (sortie de niveaux)  
         
@@ -150,11 +183,11 @@
         
         
     // joueur
-        player = this.physics.add.sprite(256,1260, 'snail');
+        player = this.physics.add.sprite(6564,1660, 'snail'); //256,1260
         player.setBounce(0.2);
-        player.setCollideWorldBounds(true);
+        player.setCollideWorldBounds(false);
         
-
+        
         
     // Cameras
         this.cameras.main.setSize(1920, 1080);
@@ -179,15 +212,24 @@
         
         vieDuJoueurText = this.add.text(20,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         joueurMortTexT = this.add.text(20,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        invincibleTexT = this.add.text(20,380,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        
+        dashTexT = this.add.text(1500,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        timerDashOnText = this.add.text(1500,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
+        
+        //this.physics.add.collider(particule1, platforms);
         
         this.physics.add.collider(spaceShip, platforms);
         this.physics.add.overlap(player, spaceShip, sortieDeNiveau);
         
         this.physics.add.collider(ennemi, platforms);
-        this.physics.add.collider(ennemi, player, degat);
+        this.physics.add.collider(ennemi, player, contacte);
+        
+        
+        
         
 // Animation -------------------------------------------------
         
@@ -247,13 +289,13 @@
         this.anims.create({
             key: 'sortie',
             frames: this.anims.generateFrameNumbers('spaceShip', { start: 1, end: 12 }),
-            frameRate: 6,
+            frameRate: 3,
         });
         
         this.anims.create({
             key: 'reacteur',
-            frames: this.anims.generateFrameNumbers('spaceShip', { start: 10, end: 11 }),
-            frameRate: 2,
+            frames: this.anims.generateFrameNumbers('spaceShip', { start: 10, end: 12 }),
+            frameRate: 6,
             repeat: 10000,
         });
         
@@ -268,11 +310,6 @@
         this.anims.create({
             key: 'blesser',
             frames: [ { key: 'vie', frame: 1. } ],
-        });
-        
-        this.anims.create({
-            key: 'douloureux',
-            frames: [ { key: 'vie', frame: 2. } ],
         });
         
         this.anims.create({
@@ -296,12 +333,10 @@
         });
         
         this.anims.create({
-            key: 'retourdashGauche',
-            frames: [ { key: 'snail', frame: 0. } ],
+            key: 'dashDroit',
+            frames: [ { key: 'snail', frame: 5. } ],
         });
-        
-        
-        
+          
 // Timer ------------------------------ 
         
        // timer = game.time.create(false);
@@ -312,39 +347,415 @@
 //________________________________________________________________________________________________________
     function update ()
     {  
-        ennemi.setVelocityX(0);
+         ennemi.setVelocityX(0);
+
+        
+// Mort du joueur ou d'un ennemi 
+    //_____________________________________________________________________________        
+        if(ennemiMort == true){
+            
+            ennemiMort = false
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+    //--------------------------------------------------------------------------
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: ennemi.x, y: ennemi.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+        }
+            
+        if(joueurMort == true){ 
+            
+            player.disableBody(true, true);
+            joueurMort = false
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_1',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+    //--------------------------------------------------------------------------
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(200, -200));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+           
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule = this.physics.add.group({
+                key: 'particule_sang_2',
+                setXY: { x: player.x, y: player.y}
+            });
+            particule.setVelocityX(Phaser.Math.Between(100, -100));
+            particule.setVelocityY(Phaser.Math.Between(-10, -400));
+            this.physics.add.collider(particule, platforms, deletParticules);
+        }
+        
+
+// SpaceShip 
+    //_____________________________________________________________________________         
+        
+        if(timerSpaceShipOn == true){
+            timeAnimeShip = timeAnimeShip + 1
+  
+            if(timeAnimeShip == 150){
+                timerSpaceShipOn == false
+                timeAnimeShip = 0
+                spaceShip.anims.play('reacteur');
+                spaceShip.setVelocityX(1000);    
+                particuleSpaceshipOn = true
+            }
+        }
+        
+    // particules--------------
+        if (particuleSpaceshipOn == true){
+            
+            particule = this.physics.add.group({
+                key: 'particule_energie_1',
+                setXY: { x: spaceShip.x - 290, y: spaceShip.y - 25}
+            }); 
+            
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule.setVelocityX(Phaser.Math.Between(-10, -50));
+            particule.setVelocityY(Phaser.Math.Between(+100, -100));
+            
+            
+            particule = this.physics.add.group({
+                key: 'particule_energie_2',
+                setXY: { x: spaceShip.x - 290, y: spaceShip.y - 25}
+            });
+            
+            this.physics.add.collider(particule, platforms, deletParticules);
+            
+            particule.setVelocityX(Phaser.Math.Between(-10, -50));
+            particule.setVelocityY(Phaser.Math.Between(+100, -100));
+            
+        }
+        
+        
+        
+// Particules 
+    //_____________________________________________________________________________      
+        
+        timerParticules = timerParticules + 1
         
         
 // Barre de Vie 
     //_____________________________________________________________________________      
         
         barreDeVie.setGravityY(-300);
-        if (vieDuJoueur <= 199.75 && joueurMort == false){
-            vieDuJoueur = vieDuJoueur + 0.25
-        }
+        if(invincible == true){
+            timerInvincible = timerInvincible + 1
+            if(timerInvincible >= TempsDinvinciblilite){
+                invincible = false
+                timerInvincible = 0
+            }
+        }  
+         
         
-        if(vieDuJoueur >= 150){
-            barreDeVie.anims.play('enVie');
-        }
-        
-        else if (vieDuJoueur >= 100 && vieDuJoueur <= 150){
-            barreDeVie.anims.play('blesser');
-        }
-        
-        else if (vieDuJoueur >= 50 && vieDuJoueur <= 100){
-            barreDeVie.anims.play('douloureux');
-        }
-        
-           
-        if (vieDuJoueur <= 0){
-            joueurMort = true
-        }   
-            
-            
 // Cam 
     //_____________________________________________________________________________
         camOffsetY = (player.y - 1080)/2;
         this.cameras.main.startFollow(player,false,0.05,0.05,0,camOffsetY);   
+        
+        
 // Debug Info :
     //_____________________________________________________________________________
         playeryText.setText('y ='+ player.y);
@@ -355,12 +766,18 @@
         camOffsetYText.setText('camOffsetY = '+camOffsetY);
         doubleJumpText.setText('Double Saut = ' +doubleJump);
         vieDuJoueurText.setText('Vie = ' +vieDuJoueur);
-        joueurMortTexT.setText('Joueur Mort = ' +joueurMort);
+        joueurMortTexT.setText('Joueur Mort = ' +ennemiMort);
+        invincibleTexT.setText('invincible = ' +invincible);
+        dashTexT.setText('dash = ' +dash);
+        timerDashOnText.setText('timerDashOn = ' +timerDashOn);
+        
 // Gravité
         //__________________________________________________________________________  
+        
     // Sol -----------------------------
         if (player.y > 1080){
             player.setGravityY(300);
+            
             gravite = true
             
             jump = - hauterDeSaut
@@ -372,6 +789,7 @@
     // plafond -------------------------
         if (player.y < 1080){
             player.setGravityY(-900);
+            
             gravite = false
             
             jump = hauterDeSaut
@@ -412,7 +830,33 @@
                 player.anims.play('turnLeftFlip');
             }
             droite = true
-
+            
+        // particules -------------------
+            if(timerParticules == 5 && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
+                
+                randomParticules = Phaser.Math.Between(1, 2)
+                if(randomParticules == 1){
+                    particule = this.physics.add.group({
+                        key: 'particule_herbe_1',
+                        setXY: { x: player.x + 40, y: player.y + 20}
+                    });
+                }
+                
+                else if(randomParticules == 2){                    
+                    particule = this.physics.add.group({
+                        key: 'particule_herbe_2',
+                        setXY: { x: player.x + 40, y: player.y + 20}
+                    });
+                }
+                
+                particule.setVelocityX(Phaser.Math.Between(-10, 0));
+                particule.setVelocityY(Phaser.Math.Between(-10, -100));
+                this.physics.add.collider(particule, platforms, deletParticules);
+                
+            }
+            if(timerParticules >= 10){
+                timerParticules = 0
+            }  
         }
         
     //Droite --------------------------
@@ -426,14 +870,40 @@
                 player.anims.play('turnRightFlip');
             }
             droite = false
+            
+        // particules -------------------
+            if(timerParticules == 5 && toucheLeSol == true && timerDashOn == false && timerSpaceShipOn == false){
+                
+                randomParticules = Phaser.Math.Between(1, 2)
+                if(randomParticules == 1){
+                    particule = this.physics.add.group({
+                        key: 'particule_herbe_1',
+                        setXY: { x: player.x - 40, y: player.y + 20}
+                    });
+                }
+                
+                else if(randomParticules == 2){                    
+                    particule = this.physics.add.group({
+                        key: 'particule_herbe_2',
+                        setXY: { x: player.x - 40, y: player.y + 20}
+                    });
+                }
+                
+                particule.setVelocityX(Phaser.Math.Between(10, 0));
+                particule.setVelocityY(Phaser.Math.Between(-10, -100));
+                this.physics.add.collider(particule, platforms, deletParticules);
+                
+            }
+            if(timerParticules >= 10){
+                timerParticules = 0
+            } 
         }
         
     //Kill du momentum ----------------
         else{
             player.setVelocityX(0);
         }
-    
-        
+     
     //Saut  -----------------------------------------------
     
         if (cursors.up.isDown && toucheLeSol == true){
@@ -451,28 +921,104 @@
             doubleJump = false
         }
         
-    // Pouvoir -------------------------
+        
+// Pouvoir
+        //_____________________________________________________________________________
     
-        if(dash == true){
-           // dash = false
-            if (cursors.space.isDown && cursors.left.isDown){
+        if(dash == true && cursors.space.isDown && cursors.left.isDown){
+            timerDashOn = true
+            dash = false
+            directionDash = true   
+        }  
+        
+        if(dash == true && cursors.space.isDown && cursors.right.isDown){
+            timerDashOn = true
+            dash = false
+            directionDash = false    
+        } 
+        
+        
+        if(directionDash == true){
+            if(timerDashOn == true){
+                droite = true
+                timerDash = timerDash + 1
                 player.anims.play('dashGauche');
                 player.setVelocityX(-1000);
-                if(cursors.space.isUp){
-                    player.anims.play('retourdashGauche');
+                
+            // Particules ------
+                if (timerSpaceShipOn == false){
+                    particule = this.physics.add.group({
+                        key: 'particule_energie_1',
+                        setXY: { x: player.x + 27, y: player.y}
+                    }); 
+
+                    this.physics.add.collider(particule, platforms, deletParticules);
+
+                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
+
+                    particule = this.physics.add.group({
+                        key: 'particule_energie_2',
+                        setXY: { x: player.x + 27, y: player.y}
+                    });
+
+                    this.physics.add.collider(particule, platforms, deletParticules);
+
+                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
                 }
-                
-                
-            }  
-            if (cursors.space.isDown && cursors.right.isDown){
-                
-                player.setVelocityX(1000);  
-            }  
+                    
+            // Retour de dash
+                if(timerDash >= 50){
+                    timerDashOn = false
+                    player.anims.play('flipGauche'); 
+                    
+                }  
+            }
         }
         
-    
-        
+        if(directionDash == false){
+            if(timerDashOn == true){
+                droite = false
+                timerDash = timerDash + 1
+                player.anims.play('dashDroit');
+                player.setVelocityX(1000);
 
+            // Particules ------
+                if(timerSpaceShipOn == false){
+                    particule = this.physics.add.group({
+                        key: 'particule_energie_1',
+                        setXY: { x: player.x - 27, y: player.y}
+                    }); 
+
+                    this.physics.add.collider(particule, platforms, deletParticules);
+
+                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
+
+                    particule = this.physics.add.group({
+                        key: 'particule_energie_2',
+                        setXY: { x: player.x - 27, y: player.y}
+                    });
+
+                    this.physics.add.collider(particule, platforms, deletParticules);
+
+                    particule.setVelocityX(Phaser.Math.Between(-10, -50));
+                    particule.setVelocityY(Phaser.Math.Between(+100, -100));
+                }
+                    
+            // Retour de dash
+                if(timerDash >= 50){
+                    timerDashOn = false
+                    player.anims.play('flipDroit');
+                }  
+            }
+        }
+        
+        
+        
+        
+        
     }
 
 //__ Fonction Anex _______________________________________________________________________________________ 
@@ -484,6 +1030,9 @@
         toucheLeSol = true
         doubleJump = false
         finDoubleJump = false
+        if(player.y > 2130 || player.y < 30){
+            joueurMort = true
+        }
     }
     
     
@@ -492,40 +1041,56 @@
         
         player.disableBody(true, true);
         spaceShip.anims.play('sortie');
-        //spaceShip.anims.play('reacteur');
+        
+        timerSpaceShipOn = true
+        
         spaceShip.setGravityY(-300);
         spaceShip.setVelocityY(-200);
+        
+        
     }
       
     
-    function degat (player, ennemi)
+    
+    function deletParticules (particule, platforms)
     {
-        
-        if (vieDuJoueur > 0){
-            vieDuJoueur = vieDuJoueur - 2
+        particule.disableBody(true, true); 
+    }
+    
+    
+    
+    function contacte (ennemi, player)
+    {
+      //Degat au ennemi -------    
+        if (timerDashOn == true){
+            ennemi.disableBody(true, true);
+            ennemiMort = true
+     
         }
         
         
-        if(vieDuJoueur >= 150){
+      //Degat au hero -------
+        if (vieDuJoueur > 0 && invincible == false && timerDashOn == false){
+            vieDuJoueur = vieDuJoueur - 1
+            invincible = true
+        }
+        
+        if(vieDuJoueur == 3){
             barreDeVie.anims.play('enVie');
         }
         
-        else if (vieDuJoueur >= 100 && vieDuJoueur <= 150){
+        else if (vieDuJoueur == 2){
             barreDeVie.anims.play('blesser');
         }
         
-        else if (vieDuJoueur >= 50 && vieDuJoueur <= 100){
-            barreDeVie.anims.play('douloureux');
-        }
-        
-        else if (vieDuJoueur >= 0 && vieDuJoueur <= 50){
+        else if (vieDuJoueur == 1){
             barreDeVie.anims.play('critique');
         }
         
         else if (vieDuJoueur <= 0){
             barreDeVie.anims.play('mort');
-        }
-         
+            joueurMort = true
+        } 
     }
     
     
