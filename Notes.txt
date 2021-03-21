@@ -9,7 +9,7 @@ Description des fichier :
 
 Sommaire :
 
-OutterSnail V: 0.5
+OutterSnail V: 0.7
 
 
 description: 

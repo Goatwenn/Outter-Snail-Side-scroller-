@@ -14,14 +14,16 @@
 
 <script type="text/javascript">
 
+// Configuration de viewport:  
+    
     var config = {
         type: Phaser.AUTO,
-        width: 8000,
-        height: 2160,
+        width: 8000,        // Largeur (x)
+        height: 2160,       // Hauteur (y)
         physics: {
             default: 'arcade',
             arcade: {
-                gravity: { y: 300 },
+                gravity: { y: 300 },     // Gravité (y)
                 debug: false
             }
             
@@ -41,7 +43,7 @@
     var player;
     var platforms;
     var cursors;
-    var fruit;
+
     var debugInfo = true;
     
     var ennemi;
@@ -54,64 +56,62 @@
     var particuleSpaceshipOn = false;
     
   // Info ------------------   
-    var gravite = true;      // Grave true = normale / false = a l'envert
-    var droite = false;    // true = gauche / false = droit
-    var test = false;
-  // UI -------------------- 
-    
-    // var echap;
-    
-   
-    
-    
+    var gravite = true;      // Grave true = normale / false = a l'envert.
+    var droite = false;      // true = gauche / false = droit.
+    var test = false;        // Variable de test.
     
   // camera ------------------    
-    var camOffsetY;
+    var camOffsetY;          // Gere le OffsetY de la cameras.
     
   // Saut ------------------  
-    var jump;
-    var toucheLeSol = false;
-    var toucheMur = false;
-    var doubleJump = false;
-    var finDoubleJump = false;
+    var jump;                    // Recupere la hauteur de saut pour gerer les changement de gravité.
+    var toucheLeSol = false;    // verifie si le joueur touche le sol.
+    var toucheMur = false;      // verifie si le joueur touche des murs.
+    var doubleJump = false;     // Autorise le joueur à double saut.
+    var finDoubleJump = false;  // Empêche le joueur de saut plus de 2 foie.
     
   // Barre De Vie ------------------  
-    var vieDuJoueur = 3;
-    var barreDeVie;
-    var joueurMort = false;
-    var invincible = false;
-    var timerInvincible = 0;
+    var vieDuJoueur = 3;        // Donne l'etat de la barre de vie ( 3 = 3 coeur, 2 = 2 coeur, ect...).
+    var barreDeVie;              // Game object de la barre de vie.
+    var joueurMort = false;     // Donne la mort du joueur.
+    var invincible = false;     // Active la frame D'invinciblilité.
+    var timerInvincible = 0;    // Timer de l'invincibilité
+    
+  // Fruits ------------------
+    var fruit;
+    var compteurDeFruit;
+    var fruitStockage = 0;
     
   // Panneaux ------------------
-    var panneaux_dash;
-    var panneaux_jetPack;
+    var panneaux_dash;          // Game Object du panneau donnant le dash.
+    var panneaux_jetPack;       // Game Object du panneau donnant le jetpack.
     
-    var panneaux_text;
-    var panneaux_text_on = false;
-    var timer_panneaux_text_on = 0;
-    var timer_on_panneaux_text_on = false;
-    var panneaux_arret = false;
+    var panneaux_text;             // Game object du panneau tutoriel.
+    var panneaux_text_on = false;   // Dit si le joueur est en overlap avec le panneau.
+    var timer_panneaux_text_on = 0; // Timer de la durée d'ouverture du panneau.
+    var timer_on_panneaux_text_on = false; // 
+    var panneaux_arret = false;         // Referme le panneau.
     
     
   // Pouvoir ------------------  
     
-    var inventaire;
-    var inventaireStockage = 0;
+    var inventaire;             // Game object de l'inventaire.
+    var inventaireStockage = 0; // Etat de l'inventaire.
     
-    var dash = false;
-    var timerDashOn = false;
-    var timerDash = 0;
-    var directionDash;
+    var dash = false;           // Si le joueur possaide le dash.
+    var timerDashOn = false;    // Lance le timer du dash.
+    var timerDash = 0;          // Timer du dash.
+    var directionDash;          // Donne la direction vert laquele le dash doit etre fait.
     
-    var jetpack = false;
-    var timerJetpack = 0;
-    var timerJetpackOn = false;
+    var jetpack = false;        // Si le joueur possaide le jetpack.
+    var timerJetpack = 0;       // Timer du jetpack.
+    var timerJetpackOn = false; // Lance le timer du jetpack.
     
     
   // Particule ------------------ 
-    var particule;
-    var timerParticules = 0;
-    var randomParticules = 0;
+    var particule;              // Game object des particules.
+    var timerParticules = 0;    // Timer permetant de donner un repetition de particules.
+    var randomParticules = 0;   // Variable aleatoir qui donne la diversité des particules.
    
 
     
@@ -125,6 +125,8 @@
     
     var TempsDinvinciblilite = 150; // Durée de L'invinciblilité 
 
+    var TempsJetpack = 300; // Durée du jetpack
+    
 //__ Fonction Preload ____________________________________________________________________________________
 //________________________________________________________________________________________________________
     
@@ -153,10 +155,16 @@
         
     // Objetc
         this.load.image('sky', 'assets/sky_niveaux1.png');
-        this.load.image('fruit', 'assets/fruit.png');
+        
         
         this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
+        
+        
+    // Fruit   
+        this.load.image('fruit', 'assets/fruit.png');
+        this.load.image('fruitFlip', 'assets/fruitFlip.png');
+        this.load.spritesheet('compteurDeFruit', 'assets/compteurDeFruit.png',{frameWidth:192, frameHeight:78});
         
     // Panneaux
         this.load.image('panneaux_dash', 'assets/panneaux_dash.png');
@@ -167,7 +175,7 @@
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
         this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
     
-    // UI -------------------------    
+    // UI  
         this.load.image('menuPause', 'assets/menus/menusPause.png');
         this.load.spritesheet('echap', 'assets/touches/echap.png',{frameWidth:76, frameHeight:76});
         this.load.spritesheet('inventaire', 'assets/inventaire.png',{frameWidth:100, frameHeight:100});
@@ -180,8 +188,8 @@
     // Particules  
         this.load.image('particule_energie_1', 'assets/particules/particule_energie_1.png');
         this.load.image('particule_energie_2', 'assets/particules/particule_energie_2.png');
-        this.load.image('particule_Flamme_1', 'assets/particules/particule_Flamme_1.png');
-        this.load.image('particule_Flamme_2', 'assets/particules/particule_Flamme_2.png');
+        this.load.image('particule_flamme_1', 'assets/particules/particule_flamme_1.png');
+        this.load.image('particule_flamme_2', 'assets/particules/particule_flamme_2.png');
         this.load.image('particule_herbe_1', 'assets/particules/particule_herbe_1.png');
         this.load.image('particule_herbe_2', 'assets/particules/particule_herbe_2.png');
         this.load.image('particule_sang_1', 'assets/particules/particule_sang_1.png');
@@ -201,20 +209,22 @@
     function create ()
     {
 
+        
     // - Sky :
         this.add.image(4000, 1080, 'sky');
         
     // - Phisique :   
         platforms = this.physics.add.staticGroup();
         
-        panneaux_text = this.physics.add.sprite(3320,1600, 'panneaux_text').setGravityY(-300);
+        panneaux_text = this.physics.add.sprite(3320,1600, 'panneaux_text');
+        panneaux_text.body.setAllowGravity(false);
         
         panneaux_dash = this.physics.add.staticGroup();
         panneaux_jetpack = this.physics.add.staticGroup();
         
     // - Platforms :          Creation des platformes
-        platforms.create(294,1907, 'platforme_M1_1');
-        platforms.create(987,1907, 'platforme_M1_2');
+        platforms.create(294,1890, 'platforme_M1_1');
+        platforms.create(987,1890, 'platforme_M1_2');
         platforms.create(1571,1764, 'platforme_M1_3');
         platforms.create(2143,792, 'platforme_M1_4');
         platforms.create(2941,1468, 'platforme_M1_5');
@@ -237,16 +247,26 @@
       
     // - UI :    Creation des element formant l'UI du jeu
         
-        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0).setGravityY(-300);
+        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);     
+        barreDeVie.body.setAllowGravity(false);
+        inventaire = this.physics.add.sprite(1820,1000, 'inventaire').setScrollFactor(0,0);
+        inventaire.body.setAllowGravity(false);
         
-        inventaire = this.physics.add.sprite(1820,1000, 'inventaire').setScrollFactor(0,0).setGravityY(-300);
+ 
+    // Fruit :   Creation d'un fruit
+      
+        fruit = this.physics.add.staticGroup();
         
-        
-       // echap = this.physics.add.sprite(50,50, 'echap').setScrollFactor(0,0).setGravityY(-300);
+        fruit.create(6862,1600, 'fruit');
+        fruit.create(1800,1910, 'fruit');
+        fruit.create(256,542, 'fruitFlip');
+
+        compteurDeFruit = this.physics.add.sprite(1650,1000, 'compteurDeFruit').setScrollFactor(0,0);
+        compteurDeFruit.body.setAllowGravity(false);
         
         
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
-        panneaux_dash.create(3620,1694, 'panneaux_dash');
+        panneaux_dash.create(3620,1694, 'panneaux_dash');    
         panneaux_jetpack.create(3920,1694, 'panneaux_jetpack');
         
     //Space Ship (sortie de niveaux)  Creation de la sortie de niveau 
@@ -255,13 +275,8 @@
     //ennemi  Creation d'un ennemi
         ennemi = this.physics.add.sprite(6064,1460, 'ennemi');
         
-    // Fruit :   Creation d'un fruit
-        //fruit = this.physics.add.group(); 
-        //var fruit = fruit.create(300,600,'fruit');
-        
-        
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(2950,1120, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(256,1600, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -277,31 +292,33 @@
         
         
     // Affichages Dubug :  Creation des ligne de debug 
-        sautText = this.add.text(100,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        doubleJumpText = this.add.text(100,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
-        playeryText = this.add.text(100,110, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
-        playerxText = this.add.text(100,140, (''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0); 
-        camOffsetYText = this.add.text(100,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        gravText = this.add.text(20,20,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        droiteText = this.add.text(20,50,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-        gravText = this.add.text(100,230,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        droiteText = this.add.text(100,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        sautText = this.add.text(20,110,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        toucheMurtext = this.add.text(20,140,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        doubleJumpText = this.add.text(20,170,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-        vieDuJoueurText = this.add.text(100,320,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        joueurMortTexT = this.add.text(100,350,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        invincibleTexT = this.add.text(100,380,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        infotext = this.add.text(20,230, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        playeryText = this.add.text(50,260, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0); 
+        playerxText = this.add.text(50,290, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0); 
+        camOffsetYText = this.add.text(20,320,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-        dashTexT = this.add.text(1500,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        timerDashOnText = this.add.text(1500,50,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        info2text = this.add.text(400,20, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        vieDuJoueurText = this.add.text(450,50,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        joueurMortTexT = this.add.text(450,80,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        invincibleTexT = this.add.text(450,110,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-        panneaux_text_ontext = this.add.text(1500,110,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        timer_panneaux_text_onText = this.add.text(1500,140,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        panneaux_arretText = this.add.text(1500,170,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        info3text = this.add.text(400,170, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        dashTexT = this.add.text(450,200,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        timerDashOnText = this.add.text(450,230,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        jetpacktext = this.add.text(450,260,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        timerJetpacktext = this.add.text(450,290,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-        testtext = this.add.text(1500,200,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
-        toucheMurtext = this.add.text(1500,260,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        compteurDeFruittext = this.add.text(450,320,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
         
-    
+        testtext = this.add.text(1600,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
@@ -315,6 +332,8 @@
         this.physics.add.overlap(panneaux_text, player, ecrire);
         this.physics.add.overlap(panneaux_dash, player, powerupdash);
         this.physics.add.overlap(panneaux_jetpack, player, powerupjetpack);
+        
+        this.physics.add.overlap(fruit, player, collectFruits);
         
         
 // Animation -------------------------------------------------
@@ -410,7 +429,23 @@
             frames: [ { key: 'vie', frame: 4. } ],
         });
         
+
+    // animation des Fruits ------------------------------          
         
+        this.anims.create({
+            key: '1_fruit',
+            frames: [ { key: 'compteurDeFruit', frame: 1. } ],
+        });
+        
+        this.anims.create({
+            key: '2_fruit',
+            frames: [ { key: 'compteurDeFruit', frame: 2. } ],
+        });
+        
+        this.anims.create({
+            key: '3_fruit',
+            frames: [ { key: 'compteurDeFruit', frame: 3. } ],
+        });
         
     // animation de l'inventaire ------------------------------      
         
@@ -867,9 +902,7 @@
         
         timerParticules = timerParticules + 1
         
-        if(timerJetpackOn == true){
-            timerJetpack = timerJetpack + 1
-        }
+
         
 // Barre de Vie 
     //_____________________________________________________________________________      
@@ -921,25 +954,33 @@
 // Debug Info :
     //_____________________________________________________________________________
         if(debugInfo == true){ 
-            playeryText.setText('y ='+ player.y);
-            playerxText.setText('x ='+ player.x);
-            sautText.setText('Au Sol = ' +toucheLeSol);
+            
             gravText.setText('grav = '+ gravite);
             droiteText.setText('Gauche = '+ droite);
-            camOffsetYText.setText('camOffsetY = '+camOffsetY);
+            
+            sautText.setText('Touche le Sol = ' +toucheLeSol);
+            toucheMurtext.setText('Touche un Mur = ' +toucheMur);
             doubleJumpText.setText('Double Saut = ' +doubleJump);
+            
+            infotext.setText('Position du joueur :');
+            playeryText.setText('y ='+ player.y);
+            playerxText.setText('x ='+ player.x);
+            camOffsetYText.setText('camOffsetY = '+camOffsetY);
+            
+            info2text.setText('Etat du joueur :');
             vieDuJoueurText.setText('Vie = ' +vieDuJoueur);
             joueurMortTexT.setText('Joueur Mort = ' +ennemiMort);
-            invincibleTexT.setText('invincible = ' +invincible);
-            dashTexT.setText('dash = ' +dash);
-            timerDashOnText.setText('timerDashOn = ' +timerDashOn);
-            panneaux_text_ontext.setText('ptOn = ' +panneaux_text_on);
-            timer_panneaux_text_onText.setText('Timer_ptOn = ' +timer_panneaux_text_on);
-            panneaux_arretText.setText('p arret = ' +panneaux_arret);
+            invincibleTexT.setText('Invinciblilité = ' +invincible);
+          
+            info3text.setText('Pouvoir du joueur :');
+            dashTexT.setText('Dash = ' +dash);
+            timerDashOnText.setText('TimerDashOn = ' +timerDashOn);
             testtext.setText('test = ' +test);
-            toucheMurtext.setText('touche Mure = ' +toucheMur);
-
+           
+            jetpacktext.setText('Jetpack = ' +jetpack);
+            timerJetpacktext.setText('Durée de vol = ' +timerJetpack);
             
+            compteurDeFruittext.setText('nb de fruit = ' +fruitStockage);
             
         }
         
@@ -962,6 +1003,7 @@
             
             gravite = true
             
+            
             jump = - hauterDeSaut
             if (player.y <= 1100){
                 toucheLeSol = false
@@ -973,6 +1015,7 @@
             player.setGravityY(-900);
             
             gravite = false
+        
             
             jump = hauterDeSaut
             if (player.y >= 1060){
@@ -982,19 +1025,23 @@
         
         if(player.y >= 1070 && gravite == false && droite == false){
             player.anims.play('reflipDroit');
+            
         }
         
         if(player.y >= 1070 && gravite == false && droite == true){
             player.anims.play('reflipGauche');
+             
         }
         
         
         if(player.y <= 1090 && gravite == true && droite == false){
             player.anims.play('flipDroit');
+              
         }
         
         if(player.y <= 1090 && gravite == true && droite == true){
             player.anims.play('flipGauche');
+          
         }
         
         
@@ -1090,12 +1137,10 @@
         }
      
     //Saut  -----------------------------------------------
+        
     
         
-
-        
-        
-        if (cursors.up.isDown && toucheLeSol == true){
+        if (cursors.up.isDown && timerJetpackOn == false &&toucheLeSol == true){
             player.setVelocityY(jump);
             toucheLeSol = false
         }
@@ -1147,7 +1192,8 @@
                         }); 
 
                         this.physics.add.collider(particule, platforms, deletParticules);
-
+                        
+                        particule.body.setAllowGravity(false);
                         particule.setVelocityX(Phaser.Math.Between(-10, -50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
                         
@@ -1159,6 +1205,7 @@
 
                         this.physics.add.collider(particule, platforms, deletParticules);
 
+                        particule.body.setAllowGravity(false);
                         particule.setVelocityX(Phaser.Math.Between(-10, -50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
                     }
@@ -1188,7 +1235,7 @@
                         }); 
 
                         this.physics.add.collider(particule, platforms, deletParticules);
-
+ 
                         particule.setVelocityX(Phaser.Math.Between(10, 50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
 
@@ -1198,7 +1245,7 @@
                         });
 
                         this.physics.add.collider(particule, platforms, deletParticules);
-
+   
                         particule.setVelocityX(Phaser.Math.Between(10, 50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
                     }
@@ -1301,18 +1348,63 @@
     // Jetpack --------------------
         
         if(jetpack == true && cursors.space.isDown){
-            inventaireStockage = 0
+            
             timerJetpackOn = true
             player.setGravityY(-300)
             
         }
         
-        if(timerJetpack >= 300){
-            jetpack = false
-            player.setGravityY(300)
+        if( timerJetpackOn == true && cursors.up.isDown ){
+            player.setVelocityY(-deplacement)
+        }
+        else if ( timerJetpackOn == true && cursors.down.isDown ){
+            player.setVelocityY(deplacement)
+        }
+        else if (timerJetpackOn == true){
+            player.setVelocityY(0)
+        }
+        
+        if (timerJetpackOn == true){
+            timerJetpack = timerJetpack + 1
         }
         
         
+        if(timerJetpack >= TempsJetpack){
+
+            jetpack = false
+            timerJetpackOn = false
+            timerJetpack = 0
+            player.setGravityY(300)
+            inventaireStockage = 0
+        }
+        
+        if (timerJetpackOn == true && timerJetpack <= TempsJetpack){
+            
+            inventaireStockage = 2
+           
+            
+            
+            particule = this.physics.add.group({
+                key: 'particule_flamme_1',
+                setXY: { x: player.x, y: player.y}
+            }); 
+
+            this.physics.add.collider(particule, platforms, deletParticules);
+
+            particule.setVelocityX(Phaser.Math.Between(-100, 100));
+            particule.setVelocityY(Phaser.Math.Between(-100, 100));
+
+            particule = this.physics.add.group({
+                key: 'particule_flamme_2',
+                setXY: { x: player.x, y: player.y}, 
+            });
+            
+            this.physics.add.collider(particule, platforms, deletParticules);
+
+            particule.setVelocityX(Phaser.Math.Between(-100, 100));
+            particule.setVelocityY(Phaser.Math.Between(-100, 100));
+            
+        }
         
         
         
@@ -1342,6 +1434,7 @@
             
         if(player.y > 2130 || player.y < 30){
             joueurMort = true
+            barreDeVie.anims.play('mort');
         }
     }
     
@@ -1439,6 +1532,23 @@
         } 
     }
     
+    function collectFruits (player, fruit)
+    {
+        fruitStockage = fruitStockage + 1
+        fruit.disableBody(true, true);
+        
+         if(fruitStockage == 1){
+            compteurDeFruit.anims.play('1_fruit');
+        }
+        
+        else if (fruitStockage == 2){
+            compteurDeFruit.anims.play('2_fruit');
+        }
+        
+        else if (fruitStockage == 3){
+            compteurDeFruit.anims.play('3_fruit');
+        }   
+    }
     
     
 </script>
