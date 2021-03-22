@@ -154,8 +154,11 @@
         this.load.image('limiteDeMap', 'assets/limiteDeMap.png');
         
     // Objetc
-        this.load.image('sky', 'assets/sky_niveaux1.png');
-        
+        this.load.image('plan1', 'assets/plan1.png');
+        this.load.image('plan2', 'assets/plan2.png');
+        this.load.image('plan3', 'assets/plan3.png');
+        this.load.image('plan4', 'assets/plan4.png');
+        this.load.image('plan5', 'assets/plan5.png');
         
         this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
@@ -168,7 +171,11 @@
         
     // Panneaux
         this.load.image('panneaux_dash', 'assets/panneaux_dash.png');
+        this.load.image('panneaux_dashflip', 'assets/panneaux_dashflip.png');
+        
         this.load.image('panneaux_jetpack', 'assets/panneaux_jetPack.png');
+        this.load.image('panneaux_jetpackflip', 'assets/panneaux_jetPackflip.png');
+        
         this.load.spritesheet('panneaux_text', 'assets/panneaux_text.png',{frameWidth:402, frameHeight:260});
         
     // Personage
@@ -180,10 +187,6 @@
         this.load.spritesheet('echap', 'assets/touches/echap.png',{frameWidth:76, frameHeight:76});
         this.load.spritesheet('inventaire', 'assets/inventaire.png',{frameWidth:100, frameHeight:100});
     
-        
-        
-        
-        
         
     // Particules  
         this.load.image('particule_energie_1', 'assets/particules/particule_energie_1.png');
@@ -211,7 +214,11 @@
 
         
     // - Sky :
-        this.add.image(4000, 1080, 'sky');
+        this.add.image(4000, 1080, 'plan5').setScrollFactor(0.20,1);
+        this.add.image(4000, 1080, 'plan4').setScrollFactor(0.30,1);
+        this.add.image(4000, 1080, 'plan3').setScrollFactor(0.50,1);
+        this.add.image(4000, 1080, 'plan2').setScrollFactor(0.70,1);
+        this.add.image(4000, 1080, 'plan1');
         
     // - Phisique :   
         platforms = this.physics.add.staticGroup();
@@ -227,9 +234,9 @@
         platforms.create(987,1890, 'platforme_M1_2');
         platforms.create(1571,1764, 'platforme_M1_3');
         platforms.create(2143,792, 'platforme_M1_4');
-        platforms.create(2941,1468, 'platforme_M1_5');
+        platforms.create(2941,1350, 'platforme_M1_5');
         platforms.create(3714,1944, 'platforme_M1_6');
-        platforms.create(4324,1638, 'platforme_M1_7');
+        platforms.create(4324,1618, 'platforme_M1_7');
         platforms.create(6848,1941, 'platforme_M1_8');
         platforms.create(2027,613, 'platforme_M1_9');
         platforms.create(1554,253, 'platforme_M1_10');
@@ -244,33 +251,16 @@
     // - limite de maps :    Creation des limite haut et basse du niveaux
         platforms.create(4000,-30, 'limiteDeMap');
         platforms.create(4000,2190, 'limiteDeMap');
-      
-    // - UI :    Creation des element formant l'UI du jeu
-        
-        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);     
-        barreDeVie.body.setAllowGravity(false);
-        inventaire = this.physics.add.sprite(1820,1000, 'inventaire').setScrollFactor(0,0);
-        inventaire.body.setAllowGravity(false);
-        
- 
-    // Fruit :   Creation d'un fruit
-      
-        fruit = this.physics.add.staticGroup();
-        
-        fruit.create(6862,1600, 'fruit');
-        fruit.create(1800,1910, 'fruit');
-        fruit.create(256,542, 'fruitFlip');
-
-        compteurDeFruit = this.physics.add.sprite(1650,1000, 'compteurDeFruit').setScrollFactor(0,0);
-        compteurDeFruit.body.setAllowGravity(false);
-        
         
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
-        panneaux_dash.create(3620,1694, 'panneaux_dash');    
+        panneaux_dash.create(3620,1694, 'panneaux_dash'); 
+        panneaux_dash.create(5180,895, 'panneaux_dashflip');
+       
         panneaux_jetpack.create(3920,1694, 'panneaux_jetpack');
+        panneaux_jetpack.create(3720,170, 'panneaux_jetpackflip');
         
     //Space Ship (sortie de niveaux)  Creation de la sortie de niveau 
-        spaceShip = this.physics.add.sprite(7464,1660, 'spaceShip');
+        spaceShip = this.physics.add.sprite(7564,1660, 'spaceShip');
         
     //ennemi  Creation d'un ennemi
         ennemi = this.physics.add.sprite(6064,1460, 'ennemi');
@@ -288,6 +278,29 @@
         
     // Cursors :  Creation des cursors pour les controles clavier / manette
         cursors = this.input.keyboard.createCursorKeys();
+        
+ 
+    // Fruit :   Creation d'un fruit
+      
+        fruit = this.physics.add.staticGroup();
+        
+        
+        fruit.create(1800,1910, 'fruit');
+        fruit.create(256,542, 'fruitFlip');
+        fruit.create(6000,1200, 'fruit');
+
+        compteurDeFruit = this.physics.add.sprite(1650,1000, 'compteurDeFruit').setScrollFactor(0,0);
+        compteurDeFruit.body.setAllowGravity(false);
+          
+        
+   // - UI :    Creation des element formant l'UI du jeu
+        
+        barreDeVie = this.physics.add.sprite(200,1000, 'vie').setScrollFactor(0,0);     
+        barreDeVie.body.setAllowGravity(false);
+        inventaire = this.physics.add.sprite(1820,1000, 'inventaire').setScrollFactor(0,0);
+        inventaire.body.setAllowGravity(false);
+             
+        
         
         
         
@@ -1192,8 +1205,6 @@
                         }); 
 
                         this.physics.add.collider(particule, platforms, deletParticules);
-                        
-                        particule.body.setAllowGravity(false);
                         particule.setVelocityX(Phaser.Math.Between(-10, -50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
                         
@@ -1204,8 +1215,6 @@
                         });
 
                         this.physics.add.collider(particule, platforms, deletParticules);
-
-                        particule.body.setAllowGravity(false);
                         particule.setVelocityX(Phaser.Math.Between(-10, -50));
                         particule.setVelocityY(Phaser.Math.Between(+100, -100));
                     }
@@ -1381,7 +1390,7 @@
         if (timerJetpackOn == true && timerJetpack <= TempsJetpack){
             
             inventaireStockage = 2
-           
+            toucheLeSol = false
             
             
             particule = this.physics.add.group({
