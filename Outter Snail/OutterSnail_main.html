@@ -86,12 +86,30 @@
     var panneaux_dash;          // Game Object du panneau donnant le dash.
     var panneaux_jetPack;       // Game Object du panneau donnant le jetpack.
     
-    var panneaux_text;             // Game object du panneau tutoriel.
-    var panneaux_text_on = false;   // Dit si le joueur est en overlap avec le panneau.
-    var timer_panneaux_text_on = 0; // Timer de la durée d'ouverture du panneau.
-    var timer_on_panneaux_text_on = false; // 
-    var panneaux_arret = false;         // Referme le panneau.
+ 
+    var panneauxText1ON = false;
+    var panneauxText1ONTimer =0;
+    var panneauxText1AnimeOpen = 0;
+                                    // Game object du panneau tutoriel.
+    var panneauxText2ON = false;
+    var panneauxText2ONTimer =0;
+    var panneauxText2AnimeOpen = 0;
     
+    var panneauxText3ON = false;
+    var panneauxText3ONTimer =0;
+    var panneauxText3AnimeOpen = 0;
+    
+    var panneauxText4ON = false;
+    var panneauxText4ONTimer =0;
+    var panneauxText4AnimeOpen = 0;
+    
+    var panneauxText5ON = false;
+    var panneauxText5ONTimer =0;
+    var panneauxText5AnimeOpen = 0;
+    
+    var panneauxText6ON = false;
+    var panneauxText6ONTimer =0;
+    var panneauxText6AnimeOpen = 0;
     
   // Pouvoir ------------------  
     
@@ -158,7 +176,6 @@
         this.load.image('plan2', 'assets/plan2.png');
         this.load.image('plan3', 'assets/plan3.png');
         this.load.image('plan4', 'assets/plan4.png');
-        this.load.image('plan5', 'assets/plan5.png');
         
         this.load.spritesheet('spaceShip', 'assets/spaceShip.png',{frameWidth:726, frameHeight:126});
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
@@ -176,11 +193,12 @@
         this.load.image('panneaux_jetpack', 'assets/panneaux_jetPack.png');
         this.load.image('panneaux_jetpackflip', 'assets/panneaux_jetPackflip.png');
         
-        this.load.spritesheet('panneaux_text', 'assets/panneaux_text.png',{frameWidth:402, frameHeight:260});
+        this.load.spritesheet('panneaux_text', 'assets/panneaux_text.png',{frameWidth:402, frameHeight:261});
+        this.load.spritesheet('panneaux_text_3', 'assets/panneaux_text_3.png',{frameWidth:402, frameHeight:261});
         
     // Personage
         this.load.spritesheet('snail', 'assets/snail.png',{frameWidth:108, frameHeight:54});
-        this.load.spritesheet('ennemi', 'assets/snail.png',{frameWidth:108, frameHeight:54});
+        this.load.image('ennemi', 'assets/ennemit.png');
     
     // UI  
         this.load.image('menuPause', 'assets/menus/menusPause.png');
@@ -214,20 +232,17 @@
 
         
     // - Parallaxe :
-        this.add.image(4000, 1080, 'plan5').setScrollFactor(0.20,1);
-        this.add.image(4000, 1080, 'plan4').setScrollFactor(0.30,1);
-        this.add.image(4000, 1080, 'plan3').setScrollFactor(0.50,1);
+        
+        this.add.image(4000, 1080, 'plan4').setScrollFactor(0.20,1);
+        this.add.image(4000, 1080, 'plan3').setScrollFactor(0.30,1);
         this.add.image(4000, 1080, 'plan2').setScrollFactor(0.70,1);
         this.add.image(4000, 1080, 'plan1');
         
+        
     // - Phisique :   
+        
         platforms = this.physics.add.staticGroup();
         
-        panneaux_text = this.physics.add.sprite(3320,1600, 'panneaux_text');
-        panneaux_text.body.setAllowGravity(false);
-        
-        panneaux_dash = this.physics.add.staticGroup();
-        panneaux_jetpack = this.physics.add.staticGroup();
         
     // - Platforms :          Creation des platformes
         platforms.create(294,1890, 'platforme_M1_1');
@@ -252,7 +267,32 @@
         platforms.create(4000,-30, 'limiteDeMap');
         platforms.create(4000,2190, 'limiteDeMap');
         
+        
+    // - Panneaux didactitiel :  
+        
+        panneauxtext1 = this.physics.add.sprite(1060,1510, 'panneaux_text');
+        panneauxtext1.body.setAllowGravity(false);
+        
+        panneauxtext2 = this.physics.add.sprite(1680,1240, 'panneaux_text');
+        panneauxtext2.body.setAllowGravity(false);
+        
+        panneauxtext3 = this.physics.add.sprite(2340,900, 'panneaux_text_3');
+        panneauxtext3.body.setAllowGravity(false);
+        
+        panneauxtext4 = this.physics.add.sprite(2620,1600, 'panneaux_text');
+        panneauxtext4.body.setAllowGravity(false);
+        
+        panneauxtext5 = this.physics.add.sprite(3320,1600, 'panneaux_text');
+        panneauxtext5.body.setAllowGravity(false);
+        
+        panneauxtext6 = this.physics.add.sprite(6050,1597, 'panneaux_text');
+        panneauxtext6.body.setAllowGravity(false);
+
     // - Panneaux :    Creation des panneaux (text, dash, jetpack)
+        
+        panneaux_dash = this.physics.add.staticGroup();
+        panneaux_jetpack = this.physics.add.staticGroup(); 
+        
         panneaux_dash.create(3620,1694, 'panneaux_dash'); 
         panneaux_dash.create(5180,895, 'panneaux_dashflip');
        
@@ -263,10 +303,10 @@
         spaceShip = this.physics.add.sprite(7564,1660, 'spaceShip');
         
     //ennemi  Creation d'un ennemi
-        ennemi = this.physics.add.sprite(6064,1460, 'ennemi');
+        ennemi = this.physics.add.sprite(6764,1460, 'ennemi');
         
     // joueur :  Creation du joeur
-        player = this.physics.add.sprite(256,1600, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
+        player = this.physics.add.sprite(2950,1120, 'snail'); //256,1600 spawn   //6564,1660 ship  //2950,1120 panneaux
         player.setBounce(0.2);
         player.setCollideWorldBounds(false);
         
@@ -306,32 +346,33 @@
         
     // Affichages Dubug :  Creation des ligne de debug 
         
-        gravText = this.add.text(20,20,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        droiteText = this.add.text(20,50,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        gravText = this.add.text(20,20,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        droiteText = this.add.text(20,50,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        sautText = this.add.text(20,110,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        toucheMurtext = this.add.text(20,140,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        doubleJumpText = this.add.text(20,170,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        sautText = this.add.text(20,110,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        toucheMurtext = this.add.text(20,140,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        doubleJumpText = this.add.text(20,170,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        infotext = this.add.text(20,230, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        playeryText = this.add.text(50,260, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0); 
-        playerxText = this.add.text(50,290, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0); 
-        camOffsetYText = this.add.text(20,320,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        infotext = this.add.text(20,230, (''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        playeryText = this.add.text(50,260, (''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0); 
+        playerxText = this.add.text(50,290, (''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0); 
+        camOffsetYText = this.add.text(20,320,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        info2text = this.add.text(400,20, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        vieDuJoueurText = this.add.text(450,50,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        joueurMortTexT = this.add.text(450,80,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        invincibleTexT = this.add.text(450,110,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        info2text = this.add.text(400,20, (''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        vieDuJoueurText = this.add.text(450,50,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        joueurMortTexT = this.add.text(450,80,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        invincibleTexT = this.add.text(450,110,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        info3text = this.add.text(400,170, (''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        dashTexT = this.add.text(450,200,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        timerDashOnText = this.add.text(450,230,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        jetpacktext = this.add.text(450,260,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
-        timerJetpacktext = this.add.text(450,290,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        info3text = this.add.text(400,170, (''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        dashTexT = this.add.text(450,200,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        timerDashOnText = this.add.text(450,230,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        jetpacktext = this.add.text(450,260,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
+        timerJetpacktext = this.add.text(450,290,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        compteurDeFruittext = this.add.text(450,320,(''), { fontSize: '22px', fill: '#000' }).setScrollFactor(0,0);
+        compteurDeFruittext = this.add.text(450,320,(''), { fontSize: '22px', fill: '#FFF' }).setScrollFactor(0,0);
         
-        testtext = this.add.text(1600,20,(''), { fontSize: '32px', fill: '#000' }).setScrollFactor(0,0);
+        testtext = this.add.text(1600,20,(''), { fontSize: '32px', fill: '#FFF' }).setScrollFactor(0,0);
+        
         
     // Collider et Overlap
         this.physics.add.collider(player, platforms, toucheSol);
@@ -342,7 +383,13 @@
         this.physics.add.collider(ennemi, platforms);
         this.physics.add.collider(ennemi, player, contacte);
         
-        this.physics.add.overlap(panneaux_text, player, ecrire);
+        this.physics.add.overlap(panneauxtext1, player, ecrire1);
+        this.physics.add.overlap(panneauxtext2, player, ecrire2);
+        this.physics.add.overlap(panneauxtext3, player, ecrire3);
+        this.physics.add.overlap(panneauxtext4, player, ecrire4);
+        this.physics.add.overlap(panneauxtext5, player, ecrire5);
+        this.physics.add.overlap(panneauxtext6, player, ecrire6);
+        
         this.physics.add.overlap(panneaux_dash, player, powerupdash);
         this.physics.add.overlap(panneaux_jetpack, player, powerupjetpack);
         
@@ -517,12 +564,70 @@
             frameRate: 20,
         });
         
+         this.anims.create({
+            key: 'panneaux_text_2_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 11, end: 16 }),
+            frameRate: 20,
+        });
         
+        this.anims.create({
+            key: 'panneaux_text_2_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 16, end: 21 }),
+            frameRate: 20,
+        });
         
+         this.anims.create({
+            key: 'panneaux_text_3_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text_3', { start: 0, end: 5 }),
+            frameRate: 20,
+        });
         
+        this.anims.create({
+            key: 'panneaux_text_3_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text_3', { start: 5, end: 10 }),
+            frameRate: 20,
+        });
         
+         this.anims.create({
+            key: 'panneaux_text_4_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 32, end: 37 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_4_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 38, end: 43 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_5_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 44, end: 49 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_5_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 49, end: 54 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_6_ecrire',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 55, end: 60 }),
+            frameRate: 20,
+        });
+        
+        this.anims.create({
+            key: 'panneaux_text_6_effacer',
+            frames: this.anims.generateFrameNumbers('panneaux_text', { start: 60, end: 65 }),
+            frameRate: 20,
+        });
     }
   
+
+    
+    
 //__ Fonction Update _____________________________________________________________________________________
 //________________________________________________________________________________________________________
     function update ()
@@ -945,18 +1050,146 @@
 // Panneaux
     //_____________________________________________________________________________       
         
-        if(timer_on_panneaux_text_on == true){
-            timer_panneaux_text_on = timer_panneaux_text_on +1
-        }     
-        
-        if (timer_panneaux_text_on >= 150 && timer_panneaux_text_on <= 151){
-            panneaux_text.anims.play('panneaux_text_1_effacer');
+    // Panneaux 1
+        if(panneauxText1ON == true){
+            panneauxText1ONTimer = panneauxText1ONTimer +1
+            panneauxText1AnimeOpen = panneauxText1AnimeOpen +1
+            
+            
+            if(panneauxText1AnimeOpen == 5 ){
+                panneauxtext1.anims.play('panneaux_text_1_ecrire');
+            }
+            
+         
+            if(panneauxText1ONTimer >= 20){
+                
+                if(player.x < 805 || player.x > 1315){
+                    panneauxText1ON = false
+                    panneauxText1AnimeOpen = 0
+                    panneauxtext1.anims.play('panneaux_text_1_effacer') 
+                }
+                
+                panneauxText1ONTimer = 0
+            }
         }
+
         
-        if (timer_panneaux_text_on >= 200){
-            timer_on_panneaux_text_on = false
-            timer_panneaux_text_on = 0
+    // Panneaux 2
+        if(panneauxText2ON == true){
+            panneauxText2ONTimer = panneauxText2ONTimer +1
+            panneauxText2AnimeOpen = panneauxText2AnimeOpen +1
+            
+            
+            if(panneauxText2AnimeOpen == 5 ){
+                panneauxtext2.anims.play('panneaux_text_2_ecrire');
+            }
+            
+         
+            if(panneauxText2ONTimer >= 20){
+                
+                if(player.x < 1425 || player.x > 1935){
+                    panneauxText2ON = false
+                    panneauxText2AnimeOpen = 0
+                    panneauxtext2.anims.play('panneaux_text_2_effacer') 
+                }
+                
+                panneauxText2ONTimer = 0
+            }
+        }   
+        
+       
+    // Panneaux 3
+        if(panneauxText3ON == true){
+            panneauxText3ONTimer = panneauxText3ONTimer +1
+            panneauxText3AnimeOpen = panneauxText3AnimeOpen +1
+            
+            
+            if(panneauxText3AnimeOpen == 5 ){
+                panneauxtext3.anims.play('panneaux_text_3_ecrire');
+            }
+            
+         
+            if(panneauxText3ONTimer >= 20){
+                
+                if(player.x < 2085 || player.x > 2595){
+                    panneauxText3ON = false
+                    panneauxText3AnimeOpen = 0
+                    panneauxtext3.anims.play('panneaux_text_3_effacer') 
+                }
+                
+                panneauxText3ONTimer = 0
+            }
         }
+    
+    // Panneaux 4
+        if(panneauxText4ON == true){
+            panneauxText4ONTimer = panneauxText4ONTimer +1
+            panneauxText4AnimeOpen = panneauxText4AnimeOpen +1
+            
+            
+            if(panneauxText4AnimeOpen == 5 ){
+                panneauxtext4.anims.play('panneaux_text_4_ecrire');
+            }
+            
+         
+            if(panneauxText4ONTimer >= 20){
+                
+                if(player.x < 2365 || player.x > 2875){
+                    panneauxText4ON = false
+                    panneauxText4AnimeOpen = 0
+                    panneauxtext4.anims.play('panneaux_text_4_effacer') 
+                }
+                
+                panneauxText4ONTimer = 0
+            }
+        } 
+        
+    // Panneaux 5
+        if(panneauxText5ON == true){
+            panneauxText5ONTimer = panneauxText5ONTimer +1
+            panneauxText5AnimeOpen = panneauxText5AnimeOpen +1
+            
+            
+            if(panneauxText5AnimeOpen == 5 ){
+                panneauxtext5.anims.play('panneaux_text_5_ecrire');
+            }
+            
+         
+            if(panneauxText5ONTimer >= 20){
+                
+                if(player.x < 3065 || player.x > 3575){
+                    panneauxText5ON = false
+                    panneauxText5AnimeOpen = 0
+                    panneauxtext5.anims.play('panneaux_text_5_effacer') 
+                }
+                
+                panneauxText5ONTimer = 0
+            }
+        }
+     
+    // Panneaux 6
+        if(panneauxText6ON == true){
+            panneauxText6ONTimer = panneauxText6ONTimer +1
+            panneauxText6AnimeOpen = panneauxText6AnimeOpen +1
+            
+            
+            if(panneauxText6AnimeOpen == 5 ){
+                panneauxtext6.anims.play('panneaux_text_6_ecrire');
+            }
+            
+         
+            if(panneauxText6ONTimer >= 20){
+                
+                if(player.x < 5795 || player.x > 6305){
+                    panneauxText6ON = false
+                    panneauxText6AnimeOpen = 0
+                    panneauxtext6.anims.play('panneaux_text_6_effacer') 
+                }
+                
+                panneauxText6ONTimer = 0
+            }
+        } 
+        
         
 // Cam 
     //_____________________________________________________________________________
@@ -994,19 +1227,10 @@
             timerJetpacktext.setText('Durée de vol = ' +timerJetpack);
             
             compteurDeFruittext.setText('nb de fruit = ' +fruitStockage);
+
             
         }
-        
-// menus :
-    //_____________________________________________________________________________   
-   
-    
-        
-        
-        
-        
-        
-        
+
 // Gravité
         //__________________________________________________________________________  
         
@@ -1463,25 +1687,7 @@
         
     }
       
-    
-    
-    function ecrire (panneaux_text, player)
-    {
-        
-        timer_on_panneaux_text_on = true
-        
-        if(timer_panneaux_text_on <= 20){
-            panneaux_text.anims.play('panneaux_text_1_ecrire');
-        }
-        
-        if(panneaux_arret == true){
-            panneaux_text.anims.play('panneaux_text_1_effacer');  
-        }
-    
-            
-    }
-    
-    
+
     
     function deletParticules (particule, platforms)
     {
@@ -1505,6 +1711,51 @@
         inventaireStockage = 2
     }
     
+    
+    
+    
+    
+    function ecrire1 (panneauxtext1, player)
+    {
+        
+        panneauxText1ON = true 
+        
+    }
+    
+    function ecrire2 (panneauxtext2, player)
+    {
+        
+        panneauxText2ON = true 
+        
+    }
+    
+    function ecrire3 (panneauxtext3, player)
+    {
+        
+        panneauxText3ON = true 
+        
+    }
+    
+    function ecrire4 (panneauxtext4, player)
+    {
+        
+        panneauxText4ON = true 
+        
+    }
+    
+    function ecrire5 (panneauxtext5, player)
+    {
+        
+        panneauxText5ON = true 
+        
+    }
+    
+    function ecrire6 (panneauxtext6, player)
+    {
+        
+        panneauxText6ON = true 
+        
+    }
     
     
     function contacte (ennemi, player)
