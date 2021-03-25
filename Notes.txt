@@ -11,6 +11,8 @@ Sommaire :
 
 OutterSnail V: 0.8
 
+https://goatwenn.github.io/GD1A_SIDE_RIGOT/Outter_Snail/OutterSnail_main
+
 
 description: 
 
