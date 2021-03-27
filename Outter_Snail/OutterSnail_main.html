@@ -189,7 +189,7 @@
         this.load.spritesheet('vie', 'assets/barreDeVie.png',{frameWidth:218, frameHeight:54});
         
     // Meta Ui    
-        this.load.spritesheet('meta','assets/metaUI.png',{frameWidth:1920, frameHeight:1080});
+        this.load.spritesheet('meta','assets/metaUI1.png',{frameWidth:1920, frameHeight:1080});
         this.load.spritesheet('meta2','assets/metaUI2.png',{frameWidth:1920, frameHeight:1080});
         this.load.image('meta3','assets/metaUI3.png');
         
@@ -353,7 +353,7 @@
         
     // - Meta UI : 
       
-        metaUi = this.physics.add.sprite(960,540, 'meta2').setScrollFactor(0,0);     
+        metaUi = this.physics.add.sprite(960,540, 'meta').setScrollFactor(0,0);     
         metaUi.body.setAllowGravity(false);
         
         metaUi2 = this.physics.add.sprite(960,540, 'meta2').setScrollFactor(0,0);     
