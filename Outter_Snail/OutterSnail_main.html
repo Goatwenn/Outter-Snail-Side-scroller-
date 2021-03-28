@@ -44,7 +44,8 @@
     var player;
     var platforms;
     var cursors;
-
+    var toucheA = false;
+    
     var debugInfo = false;
     var metaUi ; 
     
@@ -1567,17 +1568,27 @@
     //Saut  -----------------------------------------------
         
     
+        if(pad.A){
+            toucheA = true
+        }
+        else {
+            toucheA = false
+        }
         
-        if (cursors.up.isDown && timerJetpackOn == false &&toucheLeSol == true || pad.A && timerJetpackOn == false &&toucheLeSol == true){
+        
+        
+        
+        
+        if (cursors.up.isDown && timerJetpackOn == false &&toucheLeSol == true || toucheA == true && timerJetpackOn == false &&toucheLeSol){
             player.setVelocityY(jump);
             toucheLeSol = false
         }
         
-        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false ){
+        if (cursors.up.isUp && toucheLeSol == false && finDoubleJump == false || toucheA == false && toucheLeSol == false && finDoubleJump == false){
             doubleJump = true
         }
         
-        if (cursors.up.isDown && doubleJump == true || pad.A && doubleJump == true){
+        if (cursors.up.isDown && doubleJump == true || toucheA == true && doubleJump == true){
             player.setVelocityY(jump);
             finDoubleJump = true
             doubleJump = false
